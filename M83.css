@@ -1,8 +1,10 @@
 /* СТИЛІ ДЛЯ СТОРІНКИ MADONNA (1983) */
-body 
-{
- 
-    color: white;
+body {
+    font-family: Georgis, sans-serif;
+    margin: 0;
+    padding: 0;
+	overflow-x: hidden;
+    margin: 0;
 }
 .background 
 {
@@ -70,98 +72,174 @@ body
     opacity: 0;
     transform: translateY(50px);
 }
-.menu-container 
-{
-    position: relative;
-    display: inline-block;
-    margin: 0 20px; /* Відстань між контейнерами */
+
+/* Кнопка відкриття меню */
+#menu-toggle {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 18px;
+    border-radius: 5px;
 }
 
-.menu-trigger 
-{
+#menu-toggle:hover {
+    background-color: #555;
+}
+
+/* Бокове меню */
+
+#sidebar {
+    position: fixed;
+    top: 0;
+    left: -250px;
+    width: 250px;
+    height: 100%;
+    background: #222;
+    color: white;
+    transition: left 0.3s ease-in-out;
+    padding-top: 60px;
+    overflow-y: auto;
+    box-sizing: border-box; /* Враховуємо padding у розмірах */
+    padding-bottom: 50px; /* Додаємо відступ внизу */
+    overflow-y: auto;
+}
+
+/* Основний вміст сторінки */
+#main-content {
+    margin-left: 0;
+    transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
+    padding: 20px;
+    max-width: 100vw; /* Фіксована ширина сайту */
+    box-sizing: border-box; /* Щоб padding не збільшував розмір */
+}
+
+/* При відкритті меню */
+.sidebar-open #sidebar {
+    left: 0;
+}
+
+.sidebar-open #main-content {
+    margin-left: 250px; /* Контент зсувається */
+    width: calc(100% - 250px); /* Ширина сторінки не змінюється */
+}
+
+/* Виправляємо зсув сторінки при відкритті меню */
+.sidebar-open body {
+    position: fixed;
+    width: 100%;
+}
+/* Закриваюча кнопка */
+#close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 25px;
+    background: none;
+    border: none;
+    color: white;
     cursor: pointer;
 }
 
-.menu-trigger a 
-{
-    text-decoration: none; /* Вилучає підкреслення з посилання */
-    color: inherit; /* Встановлює колір тексту таким, як у батьківського елемента */
+#close-btn:hover {
+    color: #ff4d4d;
 }
 
-.dropdown-menu 
-{
-    position: absolute;
-    left: 50%;
-    top: 100%;
-    transform: translateX(-50%) translateY(-10px);
-    background: rgba(0, 0, 0, 0.8);
-    list-style: none;
+/* Список меню */
+#sidebar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+#sidebar ul li {
     padding: 10px;
-    margin: 0;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    border-radius: 5px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.8);
-    white-space: nowrap; /* Забезпечує відображення елементів в одному рядку */
+    text-align: center;
 }
 
-.dropdown-menu li 
-{
-    display: block; /* Кожен елемент буде на новому рядку */
-    padding: 5px 10px; /* Відступи для кращого вигляду */
-}
-
-.dropdown-menu a 
-{
+/* Основні пункти */
+#sidebar ul li a {
     color: white;
     text-decoration: none;
     display: block;
-    white-space: nowrap; /* Забезпечує, щоб текст не переносився */
+    font-size: 18px;
+    padding: 10px;
 }
 
-.dropdown-menu a:hover 
-{
-    text-decoration: underline;
+#sidebar ul li a:hover {
+    background: #444;
 }
 
-.menu-container:hover .dropdown-menu,
-.menu-container:focus-within .dropdown-menu {
-    opacity: 1;
-    visibility: visible;
-    transform: translateX(-50%) translateY(0);
+/* Стилі для підменю */
+.submenu {
+    display: block; /* Відкрито за замовчуванням */
+    background: #333;
+    padding: 0;
 }
+
+.submenu li {
+    padding: 8px;
+}
+
+.submenu-toggle {
+    cursor: pointer;
+    display: block;
+    font-size: 18px;
+}
+
+/* Закрите підменю */
+.has-submenu.closed .submenu {
+    display: none;
+}
+
+
 
 /* Контейнер для зображення та каруселі */
 /* Контейнер для всього контенту */
 .content-wrapper {
     display: flex;
     align-items: center;
-    justify-content: flex-start; /* Вирівнюємо контент вліво */
-    gap: 150px; /* Відступ між картинкою та каруселлю */
+    justify-content: flex-start;
+    gap: 100px; /* Відступ між картинкою та каруселлю */
     width: 100%;
+    transition: all 0.3s ease-in-out;
 }
 
 /* Контейнер для статичного зображення */
 .image-container {
-    flex-shrink: 0; /* Забороняє зменшення зображення */
+    flex-shrink: 1; /* Дозволяємо зміну розміру */
+    flex-grow: 1; /* Дозволяємо займати більше місця */
 }
 
+/* Картинка тепер адаптивна */
 .static-image {
-    width: 750px; /* Фіксована ширина картинки */
+    width: 60vw; /* Картинка пропорційно зменшується */
+    max-width: 750px;
     height: 250px;
     display: block;
+    transition: width 0.3s ease-in-out; /* Плавне зменшення */
 }
 
-/* Контейнер каруселі */
+/* Карусель */
 .carousel-wrapper {
     display: flex;
     align-items: center;
-    justify-content: var(--carousel-align, flex-start); /* Визначаємо напрямок */
+    justify-content: flex-start;
     position: relative;
-    max-width: var(--carousel-width, 1000px); /* Ширина */
-    float: var(--carousel-float, none); /* Додаємо для обтікання */
-    margin: 10px; /* Відступ для тексту */
+    max-width: 1000px;
+    flex-grow: 2; /* Дозволяємо каруселі займати більше місця */
+}
+
+/* Коли меню відкривається */
+.sidebar-open .static-image {
+    width: 35vw; /* Картинка зменшується при відкритті меню */
+}
+
+.sidebar-open .carousel-wrapper {
+    max-width: 800px; /* Трохи зменшуємо ширину каруселі */
 }
 
 /* Додаємо відступи для коректного обтікання */
