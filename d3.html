@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Madonna Biography</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+        }
+    </style>
+</head>
+<body>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.js"></script>
+
+<script>
+    // Основні параметри сцени
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Додаємо фон
+    const backgroundTexture = new THREE.TextureLoader().load('https://www.fireworks-videos.com/wp-content/uploads/2020/02/background_stars-and-sky_2160p.jpg');
+    scene.background = backgroundTexture;
+
+    // Логотипи та аудіофайли для сфер
+    const spheresData = [
+        { texture: 'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/93ebb5d74f104d10b6de442495c156916d11a3c4/RoL1.png', link: 'M.html' },
+        { texture: 'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/93ebb5d74f104d10b6de442495c156916d11a3c4/Breath.png', link: 'M83.html' },
+        { texture: 'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/4e6b7410a9cdc519a1baf8eb40c08a57e54bbb60/YCD.png', link: 'LAV84.html' }
+    ];
+
+    // Масив сфер
+    const spheres = [];
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let currentAudio = null;
+
+    // Функція для створення сфери
+    function createSphere(positionX, data) {
+        const sphereGeometry = new THREE.SphereGeometry(7, 300, 300);
+        const sphereMaterial = new THREE.MeshStandardMaterial({
+            map: new THREE.TextureLoader().load(data.texture),
+            emissive: 0x8a2be2,
+            emissiveIntensity: 0.0
+        });
+
+        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        sphere.position.x = positionX;
+        scene.add(sphere);
+
+        // Функція обертання сфери
+        function animate() {
+            sphere.rotation.y += 0.002;
+        }
+
+        spheres.push({ mesh: sphere, link: data.link, animate });
+    }
+
+    // Створюємо три сфери
+    createSphere(-15, spheresData[0]);
+    createSphere(0, spheresData[1]);
+    createSphere(15, spheresData[2]);
+
+    // Освітлення
+    const light = new THREE.PointLight(0xffffff, 1, 100);
+    light.position.set(10, 10, 10);
+    scene.add(light);
+
+    // Камера
+    camera.position.z = 20;
+
+    // Функція для анімації сцени
+    function animateScene() {
+        requestAnimationFrame(animateScene);
+
+        // Анімація кожної сфери
+        spheres.forEach(sphereObj => sphereObj.animate());
+
+        renderer.render(scene, camera);
+    }
+
+    animateScene();
+
+    // Відстеження наведеного об'єкта
+    window.addEventListener('mousemove', (event) => {
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(spheres.map(obj => obj.mesh));
+
+        if (intersects.length > 0) {
+            const intersectedSphere = intersects[0].object;
+            const sphereObj = spheres.find(obj => obj.mesh === intersectedSphere);
+
+            if (sphereObj && currentAudio !== sphereObj.audio) {
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio.currentTime = 0;
+                }
+                currentAudio = sphereObj.audio;
+                currentAudio.play();
+            }
+        } else {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                currentAudio = null;
+            }
+        }
+    });
+
+    // Відстеження кліку для переходу за посиланням
+    window.addEventListener('click', (event) => {
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(spheres.map(obj => obj.mesh));
+
+        if (intersects.length > 0) {
+            const intersectedSphere = intersects[0].object;
+            const sphereObj = spheres.find(obj => obj.mesh === intersectedSphere);
+
+            if (sphereObj) {
+                window.location.href = sphereObj.link;
+            }
+        }
+    });
+
+</script>
+
+</body>
+</html>

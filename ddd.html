@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Madonna Biography - 3D Eras</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+        }
+    </style>
+</head>
+<body>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.js"></script>
+
+<script>
+    // Основні параметри сцени
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Додаємо фон
+    const backgroundTexture = new THREE.TextureLoader().load('https://www.fireworks-videos.com/wp-content/uploads/2020/02/background_stars-and-sky_2160p.jpg');
+    scene.background = backgroundTexture;
+
+    // Додаємо освітлення
+    const light = new THREE.PointLight(0xffffff, 1.5, 100);
+    light.position.set(10, 10, 20);
+    scene.add(light);
+
+    // Логотипи (20 штук)
+    const logos = [
+        'https://upload.wikimedia.org/wikipedia/commons/1/18/MadonnaAlbumLogo.png',
+        'https://static.wikia.nocookie.net/disneyfanon/images/d/da/Dick_Tracy_Logo.png/revision/latest?cb=20201211053251',
+        'https://upload.wikimedia.org/wikipedia/commons/b/bf/True_Blue_logo.png',
+        'https://upload.wikimedia.org/wikipedia/commons/1/18/MadonnaAlbumLogo.png',
+        'https://static.wikia.nocookie.net/disneyfanon/images/d/da/Dick_Tracy_Logo.png/revision/latest?cb=20201211053251',
+        'https://upload.wikimedia.org/wikipedia/commons/b/bf/True_Blue_logo.png',
+        'https://upload.wikimedia.org/wikipedia/commons/1/18/MadonnaAlbumLogo.png',
+        'https://static.wikia.nocookie.net/disneyfanon/images/d/da/Dick_Tracy_Logo.png/revision/latest?cb=20201211053251',
+        'https://upload.wikimedia.org/wikipedia/commons/b/bf/True_Blue_logo.png',
+        'https://upload.wikimedia.org/wikipedia/commons/1/18/MadonnaAlbumLogo.png',
+        'https://static.wikia.nocookie.net/disneyfanon/images/d/da/Dick_Tracy_Logo.png/revision/latest?cb=20201211053251',
+        'https://upload.wikimedia.org/wikipedia/commons/b/bf/True_Blue_logo.png',
+        'https://upload.wikimedia.org/wikipedia/commons/1/18/MadonnaAlbumLogo.png',
+        'https://static.wikia.nocookie.net/disneyfanon/images/d/da/Dick_Tracy_Logo.png/revision/latest?cb=20201211053251',
+        'https://upload.wikimedia.org/wikipedia/commons/b/bf/True_Blue_logo.png',
+        'https://upload.wikimedia.org/wikipedia/commons/1/18/MadonnaAlbumLogo.png',
+        'https://static.wikia.nocookie.net/disneyfanon/images/d/da/Dick_Tracy_Logo.png/revision/latest?cb=20201211053251',
+        'https://upload.wikimedia.org/wikipedia/commons/b/bf/True_Blue_logo.png',
+        'https://upload.wikimedia.org/wikipedia/commons/1/18/MadonnaAlbumLogo.png',
+        'https://static.wikia.nocookie.net/disneyfanon/images/d/da/Dick_Tracy_Logo.png/revision/latest?cb=20201211053251',
+    ];
+
+    // Музичні треки (при наведенні)
+    const musicTracks = [
+        'ToM.mp3',
+        'ToM.mp3',
+        'ToM.mp3',
+        'ToM.mp3',
+        'ToM.mp3',
+        'ToM.mp3',
+        'Angel.mp3',
+        'ToM.mp3',
+        'ToM.mp3',
+        'ToM.mp3',
+        'ToM.mp3',
+        'ToM.mp3',
+        'ToM.mp3',
+        'Angel.mp3',
+        'ToM.mp3',
+        'ToM.mp3',
+        'ToM.mp3',
+        'ToM.mp3',
+        'Angel.mp3',
+    ];
+
+    // Посилання на ери (при кліку)
+    const eraLinks = [
+        'M83.html',
+        'LAV84.html',
+        'M.html',
+        'M83.html',
+        'LAV84.html',
+        'M.html',
+        'M83.html',
+        'LAV84.html',
+        'M.html',
+        'M83.html',
+        'LAV84.html',
+        'M.html',
+        'M83.html',
+        'LAV84.html',
+        'M.html',
+        'M83.html',
+        'LAV84.html',
+        'M.html',
+        'LAV84.html',
+        'M.html',
+    ];
+
+    // Масив для сфер
+    const spheres = [];
+    const loader = new THREE.TextureLoader();
+
+    // Функція для створення сфери
+    function createSphere(position, textureUrl, musicUrl, link) {
+        const geometry = new THREE.SphereGeometry(5, 64, 64);
+        const material = new THREE.MeshStandardMaterial({
+            map: loader.load(textureUrl),
+            emissive: 0x8a2be2,
+            emissiveIntensity: 0.1,
+        });
+
+        const sphere = new THREE.Mesh(geometry, material);
+        sphere.position.set(...position);
+        scene.add(sphere);
+        spheres.push(sphere);
+
+        // Аудіо
+        const audio = new Audio(musicUrl);
+        sphere.userData = { audio, link };
+
+        return sphere;
+    }
+
+    // Розміщуємо сфери у просторі
+    const positions = [
+        [-20, 10, -10], [0, 15, -15], [20, 5, -10], 
+        [-25, -5, 0], [5, -10, 10], [15, 20, 5],
+        [-10, -15, 20], [30, -5, -20], [-30, 10, 10], 
+        [25, -10, 15], [-15, 20, -5], [10, -25, 0], 
+        [-5, 5, 25], [20, -15, 5], [-20, 25, -10],
+        [5, 10, -25], [-30, -10, 20], [15, -20, 25], 
+        [-25, 15, -5], [30, 10, -15]
+    ];
+
+    for (let i = 0; i < logos.length; i++) {
+        createSphere(positions[i], logos[i], musicTracks[i], eraLinks[i]);
+    }
+
+    // Камера
+    camera.position.set(0, 0, 40);
+
+    // Функція для обертання сфер
+    function animate() {
+        requestAnimationFrame(animate);
+        spheres.forEach(sphere => {
+            sphere.rotation.y += 0.002;
+        });
+        renderer.render(scene, camera);
+    }
+
+    animate();
+
+    // Обробка подій миші
+    let hoveredSphere = null;
+
+    window.addEventListener('mousemove', (event) => {
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2(
+            (event.clientX / window.innerWidth) * 2 - 1,
+            -(event.clientY / window.innerHeight) * 2 + 1
+        );
+
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(spheres);
+
+        if (intersects.length > 0) {
+            if (hoveredSphere !== intersects[0].object) {
+                if (hoveredSphere) {
+                    hoveredSphere.userData.audio.pause();
+                    hoveredSphere.userData.audio.currentTime = 0;
+                }
+                hoveredSphere = intersects[0].object;
+                hoveredSphere.userData.audio.play();
+            }
+        } else if (hoveredSphere) {
+            hoveredSphere.userData.audio.pause();
+            hoveredSphere.userData.audio.currentTime = 0;
+            hoveredSphere = null;
+        }
+    });
+
+    // Перехід на сторінку ери при кліку
+    window.addEventListener('click', (event) => {
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2(
+            (event.clientX / window.innerWidth) * 2 - 1,
+            -(event.clientY / window.innerHeight) * 2 + 1
+        );
+
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(spheres);
+
+        if (intersects.length > 0) {
+            const clickedSphere = intersects[0].object;
+            window.open(clickedSphere.userData.link, '_blank');
+        }
+    });
+
+</script>
+
+</body>
+</html>

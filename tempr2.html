@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Madonna Biography</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+        }
+        .logo-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+        }
+        .logo-container img {
+            width: 100px;
+            height: 100px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.js"></script>
+
+<script>
+    // Основні параметри сцени
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Додаємо фон
+    const backgroundTexture = new THREE.TextureLoader().load('https://www.fireworks-videos.com/wp-content/uploads/2020/02/background_stars-and-sky_2160p.jpg');
+    scene.background = backgroundTexture;
+
+    // Функція для створення сфери з логотипом
+    function createSphere(positionX) {
+        const sphereGeometry = new THREE.SphereGeometry(5, 64, 64);
+        const sphereMaterial = new THREE.MeshStandardMaterial({
+            map: new THREE.TextureLoader().load('https://static.wikia.nocookie.net/madonna/images/c/cc/Tumblr_m1b288ts8d1qhc4k2o6_1280.jpg/revision/latest/scale-to-width-down/690?cb=20151218172340'), // Картинка як фон
+        });
+        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        sphere.position.x = positionX; // Задаємо позицію для кожної сфери
+        scene.add(sphere);
+
+        // Додаємо анімацію обертання
+        function animate() {
+            sphere.rotation.y += 0.002; // Поворот сфери
+        }
+        
+        return { sphere, animate };
+    }
+
+    // Створюємо три сфери з відстанню між ними
+    const sphere1 = createSphere(-15);
+    const sphere2 = createSphere(0);
+    const sphere3 = createSphere(15);
+
+    // Освітлення
+    const light = new THREE.PointLight(0xffffff, 1, 100);
+    light.position.set(10, 10, 10);
+    scene.add(light);
+
+    // Камера
+    camera.position.z = 20;
+
+    // Функція для анімації сцени
+    function animateScene() {
+        requestAnimationFrame(animateScene);
+
+        // Анімація кожної сфери
+        sphere1.animate();
+        sphere2.animate();
+        sphere3.animate();
+
+        renderer.render(scene, camera);
+    }
+
+    animateScene();
+
+    // Створюємо контейнери для логотипів
+    const logoContainer = document.createElement('div');
+    logoContainer.className = 'logo-container';
+    document.body.appendChild(logoContainer);
+
+    // Логотипи для контейнерів
+    const logos = ['https://upload.wikimedia.org/wikipedia/commons/1/18/MadonnaAlbumLogo.png', 
+                   'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Express_Yourself_logo.png/1024px-Express_Yourself_logo.png', 
+                   'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Madonna_Confessions_Tour_logo.png/800px-Madonna_Confessions_Tour_logo.png?20180804232002'];
+
+    logos.forEach((src, index) => {
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = `Logo ${index + 1}`;
+        img.addEventListener('mouseover', () => {
+            const audioPlayer = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
+            audioPlayer.play();
+        });
+        img.addEventListener('mouseout', () => {
+            const audioPlayer = new Audio();
+            audioPlayer.pause();
+        });
+        logoContainer.appendChild(img);
+    });
+
+</script>
+
+</body>
+</html>

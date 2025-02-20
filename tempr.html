@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Madonna Biography</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+        }
+    </style>
+</head>
+<body>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.js"></script>
+
+<script>
+    // Основні параметри сцени
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Додаємо фон
+    const backgroundTexture = new THREE.TextureLoader().load('https://s3.eu-central-2.amazonaws.com/pub.csosy.dm7-s3.secutix.com/images/catalog/Tour/large/43cadd2e-9325-48da-a6b1-ee1592609fac.jpg');
+    scene.background = backgroundTexture;
+
+    // Створюємо сферу
+    const sphereGeometry = new THREE.SphereGeometry(5, 64, 64);
+    const sphereMaterial = new THREE.MeshStandardMaterial({
+        map: new THREE.TextureLoader().load('https://static.wikia.nocookie.net/madonna/images/c/cc/Tumblr_m1b288ts8d1qhc4k2o6_1280.jpg/revision/latest/scale-to-width-down/690?cb=20151218172340'),
+    });
+    const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    scene.add(sphere);
+
+    // Освітлення
+    const light = new THREE.PointLight(0xffffff, 1, 100);
+    light.position.set(10, 10, 10);
+    scene.add(light);
+
+    // Камера
+    camera.position.z = 10;
+
+    // Анімація сцени
+    function animate() {
+        requestAnimationFrame(animate);
+        sphere.rotation.y += 0.002; // Поворот сфери для анімації
+        renderer.render(scene, camera);
+    }
+
+    animate();
+</script>
+
+</body>
+</html>

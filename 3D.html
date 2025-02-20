@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Madonna Universe</title>
+    <link rel="icon" type="image/jpeg" href="https://www.pngkit.com/png/full/227-2270443_hard-candy-png-madonna-hard-candy-png.png">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Centaur, sans-serif;
+            background-color: black;
+        }
+
+        .welcome-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            text-align: center;
+            transition: opacity 1s ease-in-out, visibility 1s ease-in-out;
+            z-index: 1000;
+        }
+
+        .hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        #pauseButton {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+			background: none;
+            border: none;
+            cursor: pointer;
+        }
+		#pauseIcon {
+        width: 80px;  /* Або будь-який інший розмір */
+        height: 80px;
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-layer" id="welcome-layer">
+        Welcome to the Madonna Universe&nbsp;&nbsp;&nbsp;&nbsp;
+        <span style="font-size: 1em;">Click or press any key to continue</span>
+    </div>
+
+ 
+    
+    <audio id="mainAudio" loop>
+        <source src="Beast.mp3" type="audio/mpeg">
+    </audio>
+<button id="pauseButton">
+    <img id="pauseIcon" src="https://cdn-icons-png.flaticon.com/512/0/375.png" alt="Play">
+</button>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script>
+ document.addEventListener("DOMContentLoaded", () => {
+        const audioElements = {};
+        let fadeDuration = 1500;
+        let userInteraction = false;
+        let hoveredSphere = null;
+        let activeAudio = null;
+        let mainAudioPaused = false; // Track the pause state of main audio
+
+        // Declare the spheres array once
+        const spheres = [];
+
+        // Initialize Three.js scene
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+        // Audio control
+        const pauseButton = document.getElementById("pauseButton");
+        const mainAudio = document.getElementById("mainAudio");
+
+        function updatePauseButton() {
+         const pauseIcon = document.getElementById("pauseIcon");
+         pauseIcon.src = mainAudio.paused ? "https://cdn-icons-png.flaticon.com/512/0/375.png" : "https://cdn-icons-png.flaticon.com/512/2/2371.png";
+}
+
+        pauseButton.addEventListener("click", () => {
+            if (mainAudio.paused) {
+                mainAudio.play();
+                mainAudioPaused = false;
+            } else {
+                mainAudio.pause();
+                mainAudioPaused = true;
+            }
+            updatePauseButton();
+        });
+
+        // Initialize the sphere creation function
+        const loader = new THREE.TextureLoader();
+
+        function createSphere(position, textureUrl, musicUrl, link) {
+            const material = new THREE.MeshStandardMaterial({
+                map: loader.load(textureUrl),
+                emissive: 0x8a2be2,
+                emissiveIntensity: 0.1,
+            });
+
+            const sphere = new THREE.Mesh(new THREE.SphereGeometry(6, 64, 64), material);
+            sphere.position.set(...position);
+            scene.add(sphere);
+            spheres.push(sphere);
+
+            const audio = new Audio(musicUrl);
+            sphere.userData = { audio, link };
+
+            // Додаємо обробку наведеня миші на сферу
+            sphere.onmouseenter = () => {
+                if (!mainAudio.paused) {
+                    mainAudio.pause();
+                    mainAudioPaused = false; // Головне аудіо грало перед цим
+                } else {
+                    mainAudioPaused = true; // Головне аудіо вже було на паузі
+                }
+                activeAudio = audio;
+                activeAudio.play();
+                updatePauseButton();
+            };
+
+            // Додаємо обробку відведення миші
+            sphere.onmouseleave = () => {
+                if (activeAudio) {
+                    activeAudio.pause();
+                    activeAudio.currentTime = 0;
+                }
+                if (!mainAudioPaused) {
+                    mainAudio.play();
+                }
+                updatePauseButton();
+            };
+
+            return sphere;
+        }
+
+
+    // Масиви зображень, музики та посилань
+    const logos = [
+        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/4e6b7410a9cdc519a1baf8eb40c08a57e54bbb60/YCD.png',
+		'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/2e3bbc2dc90cc2b97edd1d1cf9d2aa1b78e00134/Like_A_Prayer.png',
+        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/93ebb5d74f104d10b6de442495c156916d11a3c4/Breath.png',
+        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/2e3bbc2dc90cc2b97edd1d1cf9d2aa1b78e00134/True_Blue.png',
+        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/4e6b7410a9cdc519a1baf8eb40c08a57e54bbb60/YCD.png',
+        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/2e3bbc2dc90cc2b97edd1d1cf9d2aa1b78e00134/WTG.png',
+        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/2e3bbc2dc90cc2b97edd1d1cf9d2aa1b78e00134/Like_A_Prayer.png',
+        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/4c383943cad8e252eb37b29317fcebf210a18dac/COADF_.png',
+        'https://static.wikia.nocookie.net/disneyfanon/images/d/da/Dick_Tracy_Logo.png/revision/latest?cb=20201211053251',
+        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/93ebb5d74f104d10b6de442495c156916d11a3c4/MX.jpg',
+        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/4c383943cad8e252eb37b29317fcebf210a18dac/Er.png',
+        'https://static.wikia.nocookie.net/disneyfanon/images/d/da/Dick_Tracy_Logo.png/revision/latest?cb=20201211053251',
+        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/c235896d7d2178811d0255b62711f30a088cb10a/STR.png',
+        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/4c383943cad8e252eb37b29317fcebf210a18dac/COADF_.png',
+        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/4c383943cad8e252eb37b29317fcebf210a18dac/COADF_.png',
+        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/4c383943cad8e252eb37b29317fcebf210a18dac/HCd.png',
+        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/c235896d7d2178811d0255b62711f30a088cb10a/STR.png',
+        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/93ebb5d74f104d10b6de442495c156916d11a3c4/RoL1.png',
+        'https://upload.wikimedia.org/wikipedia/commons/b/bf/True_Blue_logo.png',
+        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/c235896d7d2178811d0255b62711f30a088cb10a/STR.png',
+        'https://static.wikia.nocookie.net/disneyfanon/images/d/da/Dick_Tracy_Logo.png/revision/latest?cb=20201211053251',
+    ];
+
+    // Музичні треки (при наведенні)
+    const musicTracks = [
+        'TrueBlue.mp3',
+		'Angel.mp3',
+        'Secret.mp3',
+        'ToM.mp3',
+        'ITG.mp3',
+        'Secret.mp3',
+        'Jump.mp3',
+        'Angel.mp3',
+        'Secret.mp3',
+        'Frozen.mp3',
+        'ITG.mp3',
+        'YS.mp3',
+        'YS.mp3',
+        'ToM.mp3',
+        'Jump.mp3',
+        'ToM.mp3',
+        'Frozen.mp3',
+        'Frozen.mp3',
+        'Frozen.mp3',
+        'Angel.mp3',
+    ];
+
+    // Посилання на ери (при кліку)
+    const eraLinks = [
+        'M83.html',
+		'M83.html',
+        'LAV84.html',
+        'M.html',
+        'M83.html',
+        'LAV84.html',
+        'M.html',
+        'M83.html',
+        'LAV84.html',
+        'M.html',
+        'M83.html',
+        'LAV84.html',
+        'M.html',
+        'M83.html',
+        'LAV84.html',
+        'M.html',
+        'M83.html',
+        'LAV84.html',
+        'M.html',
+        'LAV84.html',
+        'M.html',
+    ];
+
+  
+		
+    // Розміщуємо сфери у просторі
+  const positions = [
+    [0, 0, 0],  // Центральна сфера
+    [-40, 20, -20], [0, 30, -30], [40, 10, -20], 
+    [-50, -10, 0], [10, -20, 20], [30, 40, 10],
+    [-20, -30, 40], [60, -10, -40], [-60, 20, 20], 
+    [50, -20, 30], [-30, 40, -10], [20, -50, 0], 
+    [-10, 10, 50], [40, -30, 10], [-40, 50, 0],
+    [10, 20, -50], [-60, -20, 40], [30, -40, 50], 
+    [-50, 30, -10], [60, 20, -30]
+];
+            for (let i = 0; i < logos.length; i++) {
+                createSphere(positions[i], logos[i], musicTracks[i], eraLinks[i]);
+            }
+
+const backgroundTexture = new THREE.TextureLoader().load('https://www.fireworks-videos.com/wp-content/uploads/2020/02/background_stars-and-sky_2160p.jpg');
+        scene.background = backgroundTexture;
+
+        const light = new THREE.PointLight(0xffffff, 1.5, 100);
+        light.position.set(20, 20, 20);
+        scene.add(light);
+
+        const centralSphereTexture = new THREE.TextureLoader().load("https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/4e6b7410a9cdc519a1baf8eb40c08a57e54bbb60/YCD.png");
+        const centralSphereMaterial = new THREE.MeshBasicMaterial({ map: centralSphereTexture });
+        const centralSphere = new THREE.Mesh(new THREE.SphereGeometry(10, 64, 64), centralSphereMaterial);
+        scene.add(centralSphere);
+
+        camera.position.set(0, 0, 40);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            spheres.forEach(sphere => {
+                sphere.rotation.y += 0.002;
+            });
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('mousemove', (event) => {
+            if (!userInteraction) return; // Only work after user interaction
+
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2(
+                (event.clientX / window.innerWidth) * 2 - 1,
+                -(event.clientY / window.innerHeight) * 2 + 1
+            );
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(spheres);
+
+            if (intersects.length > 0) {
+                if (hoveredSphere !== intersects[0].object) {
+                    if (activeAudio) {
+                        activeAudio.pause();
+                        activeAudio.currentTime = 0;
+                    }
+                    hoveredSphere = intersects[0].object;
+                    activeAudio = hoveredSphere.userData.audio;
+
+                    if (!mainAudio.paused) {
+                        mainAudio.pause();
+                        mainAudioPaused = false; // Відзначаємо, що головна мелодія грала
+                    } else {
+                        mainAudioPaused = true; // Головна мелодія вже була на паузі
+                    }
+
+                    activeAudio.play();
+                    updatePauseButton();
+                }
+            } else if (hoveredSphere) {
+                hoveredSphere.userData.audio.pause();
+                hoveredSphere.userData.audio.currentTime = 0;
+                hoveredSphere = null;
+
+                if (!mainAudioPaused) {
+                    mainAudio.play();
+                }
+                updatePauseButton();
+            }
+        });
+
+        window.addEventListener('click', (event) => {
+            if (!userInteraction) userInteraction = true;
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2(
+                (event.clientX / window.innerWidth) * 2 - 1,
+                -(event.clientY / window.innerHeight) * 2 + 1
+            );
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(spheres);
+
+            if (intersects.length > 0) {
+                const clickedSphere = intersects[0].object;
+                window.open(clickedSphere.userData.link, '_blank');
+            }
+        });
+
+        // Function to start the experience
+        function startExperience() {
+            if (!userInteraction) {
+                userInteraction = true;
+                document.getElementById('welcome-layer').classList.add('hidden');
+                mainAudio.play().catch(error => {
+                    console.log('Autoplay blocked:', error);
+                });
+                updatePauseButton();
+            }
+        }
+
+        document.addEventListener('keydown', startExperience);
+        document.addEventListener('click', startExperience);
+    });
+</script>
+
+</body>
+</html>
