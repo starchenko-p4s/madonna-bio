@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Madonna Universe</title>
     <link rel="icon" type="image/jpeg" href="https://www.pngkit.com/png/full/227-2270443_hard-candy-png-madonna-hard-candy-png.png">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
             overflow: hidden;
-            font-family: Centaur, sans-serif;
+            font-family: 'Orbitron', sans-serif;
             background-color: black;
         }
 
@@ -34,7 +35,16 @@
             opacity: 0;
             visibility: hidden;
         }
+		
+            @keyframes blink {
+            50% { opacity: 0; }
+        }
 
+        #cursor {
+            display: inline-block;
+            animation: blink 0.6s infinite;
+        }
+		
         #pauseButton {
             position: absolute;
             top: 10px;
@@ -46,41 +56,89 @@
             cursor: pointer;
             font-size: 16px;
             border-radius: 5px;
-			background: none;
+            background: none;
             border: none;
             cursor: pointer;
         }
-		#pauseIcon {
-        width: 80px;  /* Або будь-який інший розмір */
-        height: 80px;
+		
+        #pauseIcon {
+            width: 80px;
+            height: 80px;
+        }
+		
+        #tooltip {
+            position: fixed;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            pointer-events: none;
+            max-width: 180px;
+            word-wrap: break-word;
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="welcome-layer" id="welcome-layer">
-        Welcome to the Madonna Universe&nbsp;&nbsp;&nbsp;&nbsp;
-        <span style="font-size: 1em;">Click or press any key to continue</span>
+        <span id="welcome-text"></span><span id="cursor">_</span>
     </div>
-
- 
     
     <audio id="mainAudio" loop>
         <source src="Beast.mp3" type="audio/mpeg">
     </audio>
-<button id="pauseButton">
-    <img id="pauseIcon" src="https://cdn-icons-png.flaticon.com/512/0/375.png" alt="Play">
-</button>
+    <button id="pauseButton">
+        <img id="pauseIcon" src="https://cdn-icons-png.flaticon.com/512/0/375.png" alt="Play">
+    </button>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script>
- document.addEventListener("DOMContentLoaded", () => {
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
         const audioElements = {};
         let fadeDuration = 1500;
         let userInteraction = false;
         let hoveredSphere = null;
         let activeAudio = null;
         let mainAudioPaused = false; // Track the pause state of main audio
+        const welcomeTextElement = document.getElementById("welcome-text");
+        const cursorElement = document.getElementById("cursor");
+        const fullText = "Welcome to the Madonna Universe. Click or press any key to continue";
+        let index = 0;
 
+        function typeWriter() {
+            if (index < fullText.length) {
+                welcomeTextElement.innerHTML += fullText.charAt(index);
+                index++;
+                setTimeout(typeWriter, 75); // Швидкість друку
+            } else {
+                cursorElement.style.display = "inline-block"; // Показати курсор після завершення друку
+            }
+        }
+
+        typeWriter();
+  const sphereContainer = document.getElementById("sphere-container");
+  const tooltip = document.createElement("div");
+  tooltip.id = "tooltip";
+  tooltip.style.position = "absolute";
+  tooltip.style.display = "none";
+  tooltip.style.backgroundColor = "rgba(0, 0, 0, 0.75)";
+  tooltip.style.color = "#fff";
+  tooltip.style.padding = "5px 10px";
+  tooltip.style.borderRadius = "5px";
+  tooltip.style.fontSize = "12px";
+  tooltip.style.pointerEvents = "none";
+  document.body.appendChild(tooltip);
+
+  function showTooltip(event, text) {
+    tooltip.innerHTML = text;
+    tooltip.style.left = `${event.clientX + 10}px`;
+    tooltip.style.top = `${event.clientY + 10}px`;
+    tooltip.style.display = "block";
+  }
+
+  function hideTooltip() {
+    tooltip.style.display = "none";
+  }
         // Declare the spheres array once
         const spheres = [];
 
@@ -98,9 +156,9 @@
         const mainAudio = document.getElementById("mainAudio");
 
         function updatePauseButton() {
-         const pauseIcon = document.getElementById("pauseIcon");
-         pauseIcon.src = mainAudio.paused ? "https://cdn-icons-png.flaticon.com/512/0/375.png" : "https://cdn-icons-png.flaticon.com/512/2/2371.png";
-}
+            const pauseIcon = document.getElementById("pauseIcon");
+            pauseIcon.src = mainAudio.paused ? "https://cdn-icons-png.flaticon.com/512/0/375.png" : "https://cdn-icons-png.flaticon.com/512/2/2371.png";
+        }
 
         pauseButton.addEventListener("click", () => {
             if (mainAudio.paused) {
@@ -116,142 +174,179 @@
         // Initialize the sphere creation function
         const loader = new THREE.TextureLoader();
 
-        function createSphere(position, textureUrl, musicUrl, link) {
-            const material = new THREE.MeshStandardMaterial({
-                map: loader.load(textureUrl),
-                emissive: 0x8a2be2,
-                emissiveIntensity: 0.1,
-            });
+function createSphere(position, textureUrl, musicUrl, link, eraName) {
+    const material = new THREE.MeshStandardMaterial({
+        map: loader.load(textureUrl),
+        emissive: 0x8a2be2,
+        emissiveIntensity: 0.15,
+    });
 
-            const sphere = new THREE.Mesh(new THREE.SphereGeometry(6, 64, 64), material);
-            sphere.position.set(...position);
-            scene.add(sphere);
-            spheres.push(sphere);
+    const sphere = new THREE.Mesh(new THREE.SphereGeometry(6, 64, 64), material);
+    sphere.position.set(...position);
+    scene.add(sphere);
+    spheres.push(sphere);
 
-            const audio = new Audio(musicUrl);
-            sphere.userData = { audio, link };
+    const audio = new Audio(musicUrl);
+    sphere.userData = { audio, link, eraName };
 
-            // Додаємо обробку наведеня миші на сферу
-            sphere.onmouseenter = () => {
-                if (!mainAudio.paused) {
-                    mainAudio.pause();
-                    mainAudioPaused = false; // Головне аудіо грало перед цим
-                } else {
-                    mainAudioPaused = true; // Головне аудіо вже було на паузі
-                }
-                activeAudio = audio;
-                activeAudio.play();
-                updatePauseButton();
-            };
-
-            // Додаємо обробку відведення миші
-            sphere.onmouseleave = () => {
-                if (activeAudio) {
-                    activeAudio.pause();
-                    activeAudio.currentTime = 0;
-                }
-                if (!mainAudioPaused) {
-                    mainAudio.play();
-                }
-                updatePauseButton();
-            };
-
-            return sphere;
+    // Handle mouseenter event on sphere
+    sphere.onmouseenter = (event) => {
+        if (!mainAudio.paused) {
+            mainAudio.pause();
+            mainAudioPaused = false; // Main audio was playing before
+        } else {
+            mainAudioPaused = true; // Main audio was already paused
         }
 
+        activeAudio = audio;
+        activeAudio.play();
+        updatePauseButton();
 
-    // Масиви зображень, музики та посилань
-    const logos = [
-        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/4e6b7410a9cdc519a1baf8eb40c08a57e54bbb60/YCD.png',
-		'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/2e3bbc2dc90cc2b97edd1d1cf9d2aa1b78e00134/Like_A_Prayer.png',
-        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/93ebb5d74f104d10b6de442495c156916d11a3c4/Breath.png',
-        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/2e3bbc2dc90cc2b97edd1d1cf9d2aa1b78e00134/True_Blue.png',
-        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/4e6b7410a9cdc519a1baf8eb40c08a57e54bbb60/YCD.png',
-        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/2e3bbc2dc90cc2b97edd1d1cf9d2aa1b78e00134/WTG.png',
-        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/2e3bbc2dc90cc2b97edd1d1cf9d2aa1b78e00134/Like_A_Prayer.png',
-        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/4c383943cad8e252eb37b29317fcebf210a18dac/COADF_.png',
-        'https://static.wikia.nocookie.net/disneyfanon/images/d/da/Dick_Tracy_Logo.png/revision/latest?cb=20201211053251',
-        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/93ebb5d74f104d10b6de442495c156916d11a3c4/MX.jpg',
-        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/4c383943cad8e252eb37b29317fcebf210a18dac/Er.png',
-        'https://static.wikia.nocookie.net/disneyfanon/images/d/da/Dick_Tracy_Logo.png/revision/latest?cb=20201211053251',
-        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/c235896d7d2178811d0255b62711f30a088cb10a/STR.png',
-        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/4c383943cad8e252eb37b29317fcebf210a18dac/COADF_.png',
-        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/4c383943cad8e252eb37b29317fcebf210a18dac/COADF_.png',
-        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/4c383943cad8e252eb37b29317fcebf210a18dac/HCd.png',
-        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/c235896d7d2178811d0255b62711f30a088cb10a/STR.png',
-        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/93ebb5d74f104d10b6de442495c156916d11a3c4/RoL1.png',
-        'https://upload.wikimedia.org/wikipedia/commons/b/bf/True_Blue_logo.png',
-        'https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/c235896d7d2178811d0255b62711f30a088cb10a/STR.png',
-        'https://static.wikia.nocookie.net/disneyfanon/images/d/da/Dick_Tracy_Logo.png/revision/latest?cb=20201211053251',
-    ];
+        // Show the tooltip with the era name
+        showTooltip(event, eraName); // Show tooltip on hover
+    };
 
-    // Музичні треки (при наведенні)
-    const musicTracks = [
-        'TrueBlue.mp3',
-		'Angel.mp3',
-        'Secret.mp3',
-        'ToM.mp3',
-        'ITG.mp3',
-        'Secret.mp3',
-        'Jump.mp3',
-        'Angel.mp3',
-        'Secret.mp3',
-        'Frozen.mp3',
-        'ITG.mp3',
-        'YS.mp3',
-        'YS.mp3',
-        'ToM.mp3',
-        'Jump.mp3',
-        'ToM.mp3',
-        'Frozen.mp3',
-        'Frozen.mp3',
-        'Frozen.mp3',
-        'Angel.mp3',
-    ];
+    // Handle mouseleave event on sphere
+    sphere.onmouseleave = () => {
+        if (activeAudio) {
+            activeAudio.pause();
+            activeAudio.currentTime = 0;
+        }
+        if (!mainAudioPaused) {
+            mainAudio.play();
+        }
+        updatePauseButton();
 
-    // Посилання на ери (при кліку)
-    const eraLinks = [
-        'M83.html',
-		'M83.html',
-        'LAV84.html',
-        'M.html',
-        'M83.html',
-        'LAV84.html',
-        'M.html',
-        'M83.html',
-        'LAV84.html',
-        'M.html',
-        'M83.html',
-        'LAV84.html',
-        'M.html',
-        'M83.html',
-        'LAV84.html',
-        'M.html',
-        'M83.html',
-        'LAV84.html',
-        'M.html',
-        'LAV84.html',
-        'M.html',
-    ];
+        hideTooltip(); // Hide tooltip when leaving sphere
+    };
 
-  
+    return sphere;
+}
+
+// Function to show tooltip
+function showTooltip(event, text) {
+    tooltip.innerHTML = text;
+    tooltip.style.left = `${event.clientX + 10}px`;
+    tooltip.style.top = `${event.clientY + 10}px`;
+    tooltip.style.display = "block";
+}
+
+// Function to hide tooltip
+function hideTooltip() {
+    tooltip.style.display = "none";
+}     
+    
+
+    const eras = [
+        { name: "The Queen of Pop herself with various records and achievements, a singer who`s about to release Confessions part 2", 
+		image: "https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/4e6b7410a9cdc519a1baf8eb40c08a57e54bbb60/YCD.png", 
+		audio: "TrueBlue.mp3", link: "M83.html", position: [0, 0, 0] },
+        
+		{ name: "The groundbreaking and genre-bending debut self-titled album", 
+		image: "https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/2e3bbc2dc90cc2b97edd1d1cf9d2aa1b78e00134/Like_A_Prayer.png", 
+		audio: "Angel.mp3", link: "LAV84.html", position: [50, 0, 0] },
 		
-    // Розміщуємо сфери у просторі
-  const positions = [
-    [0, 0, 0],  // Центральна сфера
-    [-40, 20, -20], [0, 30, -30], [40, 10, -20], 
-    [-50, -10, 0], [10, -20, 20], [30, 40, 10],
-    [-20, -30, 40], [60, -10, -40], [-60, 20, 20], 
-    [50, -20, 30], [-30, 40, -10], [20, -50, 0], 
-    [-10, 10, 50], [40, -30, 10], [-40, 50, 0],
-    [10, 20, -50], [-60, -20, 40], [30, -40, 50], 
-    [-50, 30, -10], [60, 20, -30]
-];
-            for (let i = 0; i < logos.length; i++) {
-                createSphere(positions[i], logos[i], musicTracks[i], eraLinks[i]);
-            }
+		{ name: "Like a Virgin (1984)", 
+		image: "https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/93ebb5d74f104d10b6de442495c156916d11a3c4/Breath.png", 
+		audio: "Secret.mp3", link: "M83.html", position: [43.3, 25, 0] },
+		
+		{ name: "True Blue (1986)", 
+		image: "https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/2e3bbc2dc90cc2b97edd1d1cf9d2aa1b78e00134/True_Blue.png", 
+		audio: "ToM.mp3", link: "LAV84.html", position: [25, 43.3, 0] },
+		
+		{ name: "Who`s That Girl (1987)", 
+		image: "https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/4e6b7410a9cdc519a1baf8eb40c08a57e54bbb60/YCD.png", 
+		audio: "ITG.mp3", link: "M83.html", position: [0, 50, 0] },
+		
+		{ name: "You Can Dance (1987)", 
+		image: "https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/2e3bbc2dc90cc2b97edd1d1cf9d2aa1b78e00134/WTG.png", 
+		audio: "Secret.mp3", link: "M.html", position: [-25, 43.3, 0] },
+		
+		{ name: "Like a Prayer (1989)", 
+		image: "https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/2e3bbc2dc90cc2b97edd1d1cf9d2aa1b78e00134/Like_A_Prayer.png", 
+		audio: "Secret.mp3", link: "M83.html", position: [-43.3, 25, 0] },
+		
+		{ name: "The Immaculate Collection (1990)", 
+		image: "https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/4c383943cad8e252eb37b29317fcebf210a18dac/COADF_.png", 
+		audio: "Jump.mp3", link: "M.html", position: [-50, 0, 0] },
+		
+		{ name: "I`m Breathless (1990)", 
+		image: "https://static.wikia.nocookie.net/disneyfanon/images/d/da/Dick_Tracy_Logo.png/revision/latest?cb=20201211053251", 
+		audio: "Angel.mp3", link: "M83.html", position: [-43.3, -25, 0] },
+		
+		{ name: "Erotica (1992)", 
+		image: "https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/93ebb5d74f104d10b6de442495c156916d11a3c4/MX.jpg", 
+		audio: "YS.mp3", link: "M.html", position: [-25, -43.3, 0] },
+		
+		{ name: "Bedtime Stories (1994)", 
+		image: "https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/4c383943cad8e252eb37b29317fcebf210a18dac/Er.png", 
+		audio: "ITG.mp3", link: "M83.html", position: [0, -50, 0] },
+		
+		{ name: "Something To Remember (1995)", 
+		image: "https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/4c383943cad8e252eb37b29317fcebf210a18dac/Er.png", 
+		audio: "YS.mp3", link: "M83.html", position: [25, -43.3, 0] },
+		
+		{ name: "Evita (1996)", 
+		image: "https://static.wikia.nocookie.net/disneyfanon/images/d/da/Dick_Tracy_Logo.png/revision/latest?cb=20201211053251", 
+		audio: "YS.mp3", link: "M.html", position: [43.3, -25, 0] },
+		
+		{ name: "Ray of Light (1998)", 
+		image: "https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/c235896d7d2178811d0255b62711f30a088cb10a/STR.png", 
+		audio: "Frozen.mp3", link: "M83.html", position: [75, 0, 25] },
+		
+		{ name: "Music (2000)", 
+		image: "https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/4c383943cad8e252eb37b29317fcebf210a18dac/COADF_.png", 
+		audio: "YS.mp3", link: "M.html", position: [65, 37.5, 25] },
+		
+		{ name: "GHV2 (2001)", 
+		image: "https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/4c383943cad8e252eb37b29317fcebf210a18dac/COADF_.png", 
+		audio: "Frozen.mp3", link: "M83.html", position: [37.5, 65, 25] },
+		
+		{ name: "American Life (2003)", 
+		image: "https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/4c383943cad8e252eb37b29317fcebf210a18dac/HCd.png", 
+		audio: "Angel.mp3", link: "M.html", position: [0, 75, 25] },
+		
+		{ name: "Remixed & Revisited (2003)", 
+		image: "https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/439150098918053d1c0926dc9439a771b949fb07/R%26R.png", 
+		audio: "YourHonesty.mp3", link: "LAV84.html", position: [-37.5, 65, 25] },
+		
+		{ name: "COADF (2005)", 
+		image: "https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/c235896d7d2178811d0255b62711f30a088cb10a/STR.png", 
+		audio: "ITG.mp3", link: "LAV84.html", position: [-65, 37.5, 25] },
+		
+		{ name: "Hard Candy (2008)", 
+		image: "https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/93ebb5d74f104d10b6de442495c156916d11a3c4/RoL1.png", 
+		audio: "ITG.mp3", link: "LAV84.html", position: [-75, 0, 25] },
+		
+		{ name: "Celebration (2009)", 
+		image: "https://upload.wikimedia.org/wikipedia/commons/b/bf/True_Blue_logo.png", 
+		audio: "Frozen.mp3", link: "LAV84.html", position: [-65, -37.5, 25] },
+		
+		{ name: "MDNA (2012)", 
+		image: "https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/c235896d7d2178811d0255b62711f30a088cb10a/STR.png", 
+		audio: "Angel.mp3", link: "LAV84.html", position: [-37.5, -65, 25] },
+		
+		{ name: "Rebel Heart (2015)", 
+		image: "https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/439150098918053d1c0926dc9439a771b949fb07/Rebel%20Heart.png", 
+		audio: "Frozen.mp3", link: "LAV84.html", position: [0, -75, 25] },
+		
+		{ name: "Madame X (2019)", 
+		image: "https://raw.githubusercontent.com/starchenko-p4s/madonna-bio/439150098918053d1c0926dc9439a771b949fb07/Madame%20X.png", 
+		audio: "God_Control.mp3", link: "LAV84.html", position: [37.5, -65, 25] },
+		
+		{ name: "Finally Enough Love (50 Number Ones) (2022)", 
+		image: "https://static.wikia.nocookie.net/disneyfanon/images/d/da/Dick_Tracy_Logo.png/revision/latest?cb=20201211053251", 
+		audio: "WIFLFAG_50.mp3", link: "LAV84.html", position: [65, -37.5, 25] },
+		
+    ];
 
-const backgroundTexture = new THREE.TextureLoader().load('https://www.fireworks-videos.com/wp-content/uploads/2020/02/background_stars-and-sky_2160p.jpg');
+
+        // Create spheres for each era
+eras.forEach(era => {
+    createSphere(era.position, era.image, era.audio, era.link, era.name);
+});
+
+        const backgroundTexture = new THREE.TextureLoader().load('https://www.fireworks-videos.com/wp-content/uploads/2020/02/background_stars-and-sky_2160p.jpg');
         scene.background = backgroundTexture;
 
         const light = new THREE.PointLight(0xffffff, 1.5, 100);
@@ -275,49 +370,54 @@ const backgroundTexture = new THREE.TextureLoader().load('https://www.fireworks-
         }
         animate();
 
-        window.addEventListener('mousemove', (event) => {
-            if (!userInteraction) return; // Only work after user interaction
+       window.addEventListener('mousemove', (event) => {
+    if (!userInteraction) return; // Only work after user interaction
 
-            const raycaster = new THREE.Raycaster();
-            const mouse = new THREE.Vector2(
-                (event.clientX / window.innerWidth) * 2 - 1,
-                -(event.clientY / window.innerHeight) * 2 + 1
-            );
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2(
+        (event.clientX / window.innerWidth) * 2 - 1,
+        -(event.clientY / window.innerHeight) * 2 + 1
+    );
 
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(spheres);
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(spheres);
 
-            if (intersects.length > 0) {
-                if (hoveredSphere !== intersects[0].object) {
-                    if (activeAudio) {
-                        activeAudio.pause();
-                        activeAudio.currentTime = 0;
-                    }
-                    hoveredSphere = intersects[0].object;
-                    activeAudio = hoveredSphere.userData.audio;
-
-                    if (!mainAudio.paused) {
-                        mainAudio.pause();
-                        mainAudioPaused = false; // Відзначаємо, що головна мелодія грала
-                    } else {
-                        mainAudioPaused = true; // Головна мелодія вже була на паузі
-                    }
-
-                    activeAudio.play();
-                    updatePauseButton();
-                }
-            } else if (hoveredSphere) {
-                hoveredSphere.userData.audio.pause();
-                hoveredSphere.userData.audio.currentTime = 0;
-                hoveredSphere = null;
-
-                if (!mainAudioPaused) {
-                    mainAudio.play();
-                }
-                updatePauseButton();
+    if (intersects.length > 0) {
+        if (hoveredSphere !== intersects[0].object) {
+            if (activeAudio) {
+                activeAudio.pause();
+                activeAudio.currentTime = 0;
             }
-        });
+            hoveredSphere = intersects[0].object;
+            activeAudio = hoveredSphere.userData.audio;
 
+            if (!mainAudio.paused) {
+                mainAudio.pause();
+                mainAudioPaused = false; // Main audio was playing
+            } else {
+                mainAudioPaused = true; // Main audio was already paused
+            }
+
+            activeAudio.play();
+            updatePauseButton();
+
+            // Show the tooltip with the era name
+            showTooltip(event, hoveredSphere.userData.eraName); // Show tooltip on hover
+        }
+    } else if (hoveredSphere) {
+        hoveredSphere.userData.audio.pause();
+        hoveredSphere.userData.audio.currentTime = 0;
+        hoveredSphere = null;
+        activeAudio = null;
+
+        if (!mainAudioPaused) {
+            mainAudio.play();
+        }
+        updatePauseButton();
+
+        hideTooltip(); // Hide tooltip when mouse leaves sphere
+    }
+});
         window.addEventListener('click', (event) => {
             if (!userInteraction) userInteraction = true;
             const raycaster = new THREE.Raycaster();
@@ -351,6 +451,5 @@ const backgroundTexture = new THREE.TextureLoader().load('https://www.fireworks-
         document.addEventListener('click', startExperience);
     });
 </script>
-
 </body>
 </html>
